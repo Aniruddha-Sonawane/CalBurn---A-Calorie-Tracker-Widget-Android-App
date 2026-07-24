@@ -1,7 +1,7 @@
-
 package com.aniruddhasonawane.calburn.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,13 +26,13 @@ fun TabsNav(rootNav: NavController) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0),
         bottomBar = {
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 0.dp,
                 modifier = Modifier.drawWithContent {
                     drawContent()
-                    // Draw thin grey line at the very top of the bottom bar
                     drawLine(
                         color = Color.Gray.copy(alpha = 0.3f),
                         start = Offset(0f, 0f),
@@ -89,7 +89,12 @@ fun TabsNav(rootNav: NavController) {
                 .fillMaxSize()
         ) {
             when (selectedTab) {
-                0 -> TabOneScreen(onSettingsClick = { rootNav.navigate(Routes.MODAL) })
+                0 -> TabOneScreen(
+                    onSettingsClick = {
+                        rootNav.navigate(Routes.MODAL)
+                    }
+                )
+
                 1 -> TabTwoScreen()
             }
         }
