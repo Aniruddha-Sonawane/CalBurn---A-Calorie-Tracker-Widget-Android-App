@@ -64,11 +64,11 @@ fun TabsNav(rootNav: NavController) {
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    label = { Text("Tab Two") },
+                    label = { Text("Foods") },
                     icon = {
                         Icon(
                             imageVector = if (selectedTab == 1) Icons.Filled.List else Icons.Outlined.List,
-                            contentDescription = "Tab Two",
+                            contentDescription = "Foods",
                             modifier = Modifier.size(26.dp)
                         )
                     },
