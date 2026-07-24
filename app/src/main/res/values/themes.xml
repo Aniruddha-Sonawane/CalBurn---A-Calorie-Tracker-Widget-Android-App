@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.CalBurn" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Splash Screen Theme -->
+    <style name="Theme.calburn.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/purple_500</item>
+        <item name="postSplashScreenTheme">@style/Theme.calburn</item>
+    </style>
+
+    <!-- Main App Theme — parent matches original, no extra dependency needed -->
+    <style name="Theme.calburn" parent="android:Theme.Material.Light.NoActionBar" />
+
 </resources>
