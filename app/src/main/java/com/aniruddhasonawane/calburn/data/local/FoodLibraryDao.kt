@@ -32,6 +32,9 @@ interface FoodLibraryDao {
     @Query("SELECT * FROM food_library WHERE name LIKE '%' || :query || '%' ORDER BY name ASC")
     fun searchFoods(query: String): Flow<List<FoodLibraryEntity>>
 
+    @Query("SELECT COUNT(*) FROM food_library")
+    suspend fun getFoodCount(): Int
+
     @Query("DELETE FROM food_library")
     suspend fun deleteAllFoods()
 }
