@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -20,6 +21,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -29,16 +33,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -54,7 +62,7 @@ import java.util.Locale
 
 class FoodPopupActivity : ComponentActivity() {
     private val viewModel: FoodPopupViewModel by viewModels { FoodPopupViewModelFactory((application as CalBurnApplication).repository) }
-    override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { CalBurnTheme { Surface(Modifier.fillMaxWidth().padding(horizontal = 18.dp), shape = MaterialTheme.shapes.extraLarge) { PopupRoot(viewModel, ::finishAndRefresh) } } } }
+    override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState); setContent { CalBurnTheme(darkTheme = true, dynamicColor = false) { MaterialTheme(colorScheme = darkColorScheme(primary = Color(0xFFFF8A3D), background = Color(0xFF121212), surface = Color(0xFF202020), onSurface = Color.White, onBackground = Color.White, secondary = Color(0xFF85D9A7))) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { var visible by remember { mutableStateOf(false) }; LaunchedEffect(Unit) { visible = true }; AnimatedVisibility(visible = visible, enter = fadeIn() + scaleIn(initialScale = 0.92f)) { Surface(Modifier.fillMaxWidth(0.9f).widthIn(max = 640.dp), shape = RoundedCornerShape(24.dp), color = Color(0xFF121212), tonalElevation = 8.dp, shadowElevation = 18.dp) { PopupRoot(viewModel, ::finishAndRefresh) } } } } } } }
     private fun finishAndRefresh() { lifecycleScope.launch { WidgetUpdater.updateAll(this@FoodPopupActivity); finish() } }
 }
 private enum class PopupMode { LIST, NEW, ADD, EDIT }
@@ -74,7 +82,7 @@ private fun PopupRoot(viewModel: FoodPopupViewModel, complete: () -> Unit) {
 @Composable
 private fun FoodList(query: String, recent: List<FoodEntity>, foods: List<FoodEntity>, onQuery: (String) -> Unit, newFood: () -> Unit, add: (FoodEntity) -> Unit, edit: (FoodEntity) -> Unit, delete: (FoodEntity) -> Unit) {
     var pendingDelete by remember { mutableStateOf<FoodEntity?>(null) }
-    Column(Modifier.padding(20.dp).widthIn(max = 600.dp)) {
+    Column(Modifier.padding(24.dp).widthIn(max = 600.dp)) {
         Text("Add food", style = MaterialTheme.typography.headlineSmall)
         OutlinedTextField(query, onQuery, Modifier.fillMaxWidth().padding(top = 12.dp), label = { Text("Search foods") }, singleLine = true)
         Button(newFood, Modifier.fillMaxWidth().padding(top = 10.dp)) { Text("New Food") }
@@ -92,7 +100,7 @@ private fun FoodRows(foods: List<FoodEntity>, add: (FoodEntity) -> Unit, edit: (
 @Composable
 private fun FoodRow(food: FoodEntity, add: () -> Unit, edit: () -> Unit, delete: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
-    Card(Modifier.fillMaxWidth().padding(vertical = 3.dp).combinedClickable(onClick = add, onLongClick = edit)) { Row(Modifier.fillMaxWidth().padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f).padding(vertical = 8.dp)) { Text(food.name); Text("${format(food.caloriesPer100g)} kcal · ${format(food.proteinPer100g)}g protein / 100g", style = MaterialTheme.typography.bodySmall) }; Box { IconButton({ menu = true }) { Icon(Icons.Default.MoreVert, "Food menu") }; DropdownMenu(menu, { menu = false }) { DropdownMenuItem({ Text("Edit") }, { menu = false; edit() }); DropdownMenuItem({ Text("Delete") }, { menu = false; delete() }) } } } }
+    Card(Modifier.fillMaxWidth().padding(vertical = 5.dp).combinedClickable(onClick = add, onLongClick = edit), colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color(0xFF202020))) { Row(Modifier.fillMaxWidth().padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f).padding(vertical = 8.dp)) { Text(food.name); Text("${format(food.caloriesPer100g)} kcal · ${format(food.proteinPer100g)}g protein / 100g", style = MaterialTheme.typography.bodySmall) }; Box { IconButton({ menu = true }) { Icon(Icons.Default.MoreVert, "Food menu") }; DropdownMenu(menu, { menu = false }) { DropdownMenuItem({ Text("Edit") }, { menu = false; edit() }); DropdownMenuItem({ Text("Delete") }, { menu = false; delete() }) } } } }
 }
 @Composable
 private fun FoodAmount(food: FoodEntity, add: (Double) -> Unit, cancel: () -> Unit) {
@@ -108,4 +116,5 @@ private fun FoodEditor(existing: FoodEntity?, action: String, save: (FoodEntity)
 }
 @Composable private fun Field(label: String, value: String, change: (String) -> Unit) { OutlinedTextField(value, change, Modifier.fillMaxWidth().padding(top = 7.dp), label = { Text(label) }, singleLine = true) }
 private fun format(value: Double): String = String.format(Locale.US, "%.1f", value).removeSuffix(".0")
+
 
