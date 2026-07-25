@@ -95,7 +95,11 @@ fun TabsNav(rootNav: NavController) {
                     }
                 )
 
-                1 -> TabTwoScreen()
+                1 -> TabTwoScreen(
+                    onFoodClick = { foodId ->
+                        rootNav.navigate(Routes.foodDetails(foodId))
+                    }
+                )
             }
         }
     }
