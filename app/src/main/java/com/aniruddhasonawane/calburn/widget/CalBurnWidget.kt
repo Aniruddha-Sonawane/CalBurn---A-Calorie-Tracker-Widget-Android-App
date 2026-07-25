@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -22,9 +24,7 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
-import androidx.glance.layout.width
 import androidx.glance.text.FontFamily
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -47,42 +47,141 @@ class CalBurnWidget : GlanceAppWidget() {
     }
 }
 
+private data class WidgetSizing(
+    val outerPadding: Dp,
+    val valueSize: TextUnit,
+    val emojiSize: TextUnit,
+    val buttonHorizontalPadding: Dp,
+    val buttonVerticalPadding: Dp,
+    val buttonTextSize: TextUnit
+)
+
+// Continuous-ish tiers so the widget scales smoothly between grid sizes
+// (e.g. 4x1 vs 5x1 cells on the home screen) instead of jumping between
+// just two hardcoded states.
+private fun sizingFor(widthDp: Float, heightDp: Float): WidgetSizing = when {
+    widthDp >= 340f && heightDp >= 90f -> WidgetSizing(
+        outerPadding = 18.dp,
+        valueSize = 26.sp,
+        emojiSize = 20.sp,
+        buttonHorizontalPadding = 16.dp,
+        buttonVerticalPadding = 11.dp,
+        buttonTextSize = 28.sp
+    )
+    widthDp >= 260f -> WidgetSizing(
+        outerPadding = 14.dp,
+        valueSize = 22.sp,
+        emojiSize = 18.dp.value.sp,
+        buttonHorizontalPadding = 13.dp,
+        buttonVerticalPadding = 9.dp,
+        buttonTextSize = 24.sp
+    )
+    widthDp >= 200f -> WidgetSizing(
+        outerPadding = 11.dp,
+        valueSize = 18.sp,
+        emojiSize = 15.sp,
+        buttonHorizontalPadding = 10.dp,
+        buttonVerticalPadding = 7.dp,
+        buttonTextSize = 20.sp
+    )
+    else -> WidgetSizing(
+        outerPadding = 8.dp,
+        valueSize = 14.sp,
+        emojiSize = 12.sp,
+        buttonHorizontalPadding = 8.dp,
+        buttonVerticalPadding = 5.dp,
+        buttonTextSize = 16.sp
+    )
+}
+
 @androidx.compose.runtime.Composable
 private fun WidgetContent(totals: NutritionTotals) {
-    val expanded = LocalSize.current.width >= 340.dp || LocalSize.current.height >= 130.dp
-    val padding = if (expanded) 18.dp else 12.dp
-    val columnWidth = if (expanded) 72.dp else 58.dp
-    val caloriesSize = if (expanded) 31.sp else 27.sp
-    val nutrientSize = if (expanded) 27.sp else 23.sp
-    val emojiSize = if (expanded) 22.sp else 19.sp
-    Box(GlanceModifier.fillMaxSize().background(WidgetBackground).cornerRadius(28.dp).padding(padding)) {
-        Text("CalBurn", modifier = GlanceModifier.padding(top = 5.dp), style = TextStyle(color = WidgetText, fontSize = 14.sp, fontWeight = FontWeight.Bold))
-        Column(GlanceModifier.fillMaxSize()) {
-            Row(GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.Horizontal.End) {
+    val size = LocalSize.current
+    val sizing = sizingFor(size.width.value, size.height.value)
+
+    Box(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(WidgetBackground)
+            .cornerRadius(28.dp)
+            .padding(horizontal = sizing.outerPadding)
+    ) {
+        Row(
+            modifier = GlanceModifier.fillMaxSize(),
+            verticalAlignment = Alignment.Vertical.CenterVertically,
+            horizontalAlignment = Alignment.Horizontal.CenterHorizontally
+        ) {
+            NutritionSection("🔥", wholeNumber(totals.calories), sizing, GlanceModifier.defaultWeight())
+            NutritionSection("🍗", wholeNumber(totals.protein), sizing, GlanceModifier.defaultWeight())
+            NutritionSection("🌾", wholeNumber(totals.fiber), sizing, GlanceModifier.defaultWeight())
+            NutritionSection("🥑", wholeNumber(totals.fat), sizing, GlanceModifier.defaultWeight())
+
+            Box(
+                modifier = GlanceModifier.defaultWeight(),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
                     text = "+",
-                    modifier = GlanceModifier.background(WidgetAccent).cornerRadius(28.dp).padding(horizontal = 17.dp, vertical = 10.dp).clickable(actionStartActivity(Intent(LocalContext.current, FoodPopupActivity::class.java))),
-                    style = TextStyle(color = ColorProvider(Color(0xFF17120E)), fontSize = 28.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                    modifier = GlanceModifier
+                        .background(WidgetAccent)
+                        .cornerRadius(40.dp)
+                        .padding(horizontal = sizing.buttonHorizontalPadding, vertical = sizing.buttonVerticalPadding)
+                        .clickable(
+                            actionStartActivity(
+                                Intent(LocalContext.current, FoodPopupActivity::class.java)
+                            )
+                        ),
+                    style = TextStyle(
+                        color = ColorProvider(Color.Black),
+                        fontSize = sizing.buttonTextSize,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    ),
+                    maxLines = 1
                 )
-            }
-            Row(GlanceModifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.Vertical.CenterVertically, horizontalAlignment = Alignment.Horizontal.CenterHorizontally) {
-                NutritionSection("\uD83D\uDD25", wholeNumber(totals.calories), columnWidth, caloriesSize, emojiSize)
-                NutritionSection("\uD83C\uDF57", wholeNumber(totals.protein), columnWidth, nutrientSize, emojiSize)
-                NutritionSection("\uD83C\uDF3E", wholeNumber(totals.fiber), columnWidth, nutrientSize, emojiSize)
-                NutritionSection("\uD83E\uDD51", wholeNumber(totals.fat), columnWidth, nutrientSize, emojiSize)
             }
         }
     }
 }
 
 @androidx.compose.runtime.Composable
-private fun NutritionSection(emoji: String, value: String, width: androidx.compose.ui.unit.Dp, valueSize: androidx.compose.ui.unit.TextUnit, emojiSize: androidx.compose.ui.unit.TextUnit) {
-    Column(GlanceModifier.width(width), verticalAlignment = Alignment.Vertical.CenterVertically, horizontalAlignment = Alignment.Horizontal.CenterHorizontally) {
-        Text(emoji, style = TextStyle(fontSize = emojiSize, textAlign = TextAlign.Center))
-        Text(value, style = TextStyle(color = WidgetText, fontSize = valueSize, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace, textAlign = TextAlign.Center))
+private fun NutritionSection(
+    emoji: String,
+    value: String,
+    sizing: WidgetSizing,
+    modifier: GlanceModifier
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Column(
+            horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
+            verticalAlignment = Alignment.Vertical.CenterVertically
+        ) {
+            Text(
+                text = emoji,
+                style = TextStyle(fontSize = sizing.emojiSize, textAlign = TextAlign.Center),
+                maxLines = 1
+            )
+            Text(
+                text = value,
+                style = TextStyle(
+                    color = WidgetText,
+                    fontSize = sizing.valueSize,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center
+                ),
+                maxLines = 1
+            )
+        }
     }
 }
 
 private fun wholeNumber(value: Double): String = value.roundToInt().coerceAtLeast(0).toString()
-object WidgetUpdater { suspend fun updateAll(context: Context) { GlanceAppWidgetManager(context).getGlanceIds(CalBurnWidget::class.java).forEach { CalBurnWidget().update(context, it) } } }
 
+object WidgetUpdater {
+    suspend fun updateAll(context: Context) {
+        GlanceAppWidgetManager(context).getGlanceIds(CalBurnWidget::class.java).forEach {
+            CalBurnWidget().update(context, it)
+        }
+    }
+}

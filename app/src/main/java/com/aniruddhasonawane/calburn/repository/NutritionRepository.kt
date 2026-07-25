@@ -12,6 +12,7 @@ class NutritionRepository(database: NutritionDatabase) {
     private val entries = database.dailyEntryDao()
     fun observeFoods(): Flow<List<FoodEntity>> = foods.observeAll()
     fun observeRecentFoods(): Flow<List<FoodEntity>> = foods.observeRecent()
+    fun observeCategories(): Flow<List<String>> = foods.observeCategories()
     fun observeTodayTotals(): Flow<NutritionTotals> = entries.observeTotals(LocalDate.now())
     suspend fun saveFood(food: FoodEntity): Long = if (food.id == 0L) foods.insert(food) else { foods.update(food); food.id }
     suspend fun deleteFood(food: FoodEntity) = foods.delete(food)
