@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Splash Screen Theme -->
-    <style name="Theme.calburn.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
-        <item name="windowSplashScreenIconBackgroundColor">@color/purple_500</item>
-        <item name="postSplashScreenTheme">@style/Theme.calburn</item>
-    </style>
-
-    <!-- Main App Theme — parent matches original, no extra dependency needed -->
-    <style name="Theme.calburn" parent="android:Theme.Material.Light.NoActionBar" />
-
+<style name="Theme.calburn.Splash" parent="Theme.SplashScreen"><item name="windowSplashScreenBackground">@color/splash_background</item><item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item><item name="windowSplashScreenIconBackgroundColor">@color/purple_500</item><item name="postSplashScreenTheme">@style/Theme.calburn</item></style>
+<style name="Theme.calburn" parent="android:Theme.Material.Light.NoActionBar" />
+<style name="Theme.calburn.Popup" parent="Theme.calburn"><item name="android:windowIsTranslucent">true</item><item name="android:windowBackground">@android:color/transparent</item><item name="android:backgroundDimEnabled">true</item><item name="android:windowNoTitle">true</item></style>
 </resources>

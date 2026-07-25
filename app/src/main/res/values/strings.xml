@@ -1,3 +1,1 @@
-<resources>
-    <string name="app_name">CalBurn</string>
-</resources>
+<resources><string name="app_name">CalBurn</string><string name="widget_name">CalBurn nutrition</string></resources>
