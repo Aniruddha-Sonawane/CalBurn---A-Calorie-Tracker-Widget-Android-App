@@ -38,6 +38,7 @@ import kotlin.math.roundToInt
 
 private val WidgetBackground = ColorProvider(Color(0xFF121212))
 private val WidgetText = ColorProvider(Color(0xFFF7F7F7))
+private val WidgetUnitText = ColorProvider(Color(0xFF9E9E9E))
 private val WidgetAccent = ColorProvider(Color(0xFFFF8A3D))
 
 class CalBurnWidget : GlanceAppWidget() {
@@ -51,6 +52,7 @@ private data class WidgetSizing(
     val outerPadding: Dp,
     val valueSize: TextUnit,
     val emojiSize: TextUnit,
+    val unitSize: TextUnit,
     val buttonHorizontalPadding: Dp,
     val buttonVerticalPadding: Dp,
     val buttonTextSize: TextUnit
@@ -64,6 +66,7 @@ private fun sizingFor(widthDp: Float, heightDp: Float): WidgetSizing = when {
         outerPadding = 18.dp,
         valueSize = 26.sp,
         emojiSize = 20.sp,
+        unitSize = 11.sp,
         buttonHorizontalPadding = 16.dp,
         buttonVerticalPadding = 11.dp,
         buttonTextSize = 28.sp
@@ -72,6 +75,7 @@ private fun sizingFor(widthDp: Float, heightDp: Float): WidgetSizing = when {
         outerPadding = 14.dp,
         valueSize = 22.sp,
         emojiSize = 18.dp.value.sp,
+        unitSize = 10.sp,
         buttonHorizontalPadding = 13.dp,
         buttonVerticalPadding = 9.dp,
         buttonTextSize = 24.sp
@@ -80,6 +84,7 @@ private fun sizingFor(widthDp: Float, heightDp: Float): WidgetSizing = when {
         outerPadding = 11.dp,
         valueSize = 18.sp,
         emojiSize = 15.sp,
+        unitSize = 9.sp,
         buttonHorizontalPadding = 10.dp,
         buttonVerticalPadding = 7.dp,
         buttonTextSize = 20.sp
@@ -88,6 +93,7 @@ private fun sizingFor(widthDp: Float, heightDp: Float): WidgetSizing = when {
         outerPadding = 8.dp,
         valueSize = 14.sp,
         emojiSize = 12.sp,
+        unitSize = 8.sp,
         buttonHorizontalPadding = 8.dp,
         buttonVerticalPadding = 5.dp,
         buttonTextSize = 16.sp
@@ -111,10 +117,10 @@ private fun WidgetContent(totals: NutritionTotals) {
             verticalAlignment = Alignment.Vertical.CenterVertically,
             horizontalAlignment = Alignment.Horizontal.CenterHorizontally
         ) {
-            NutritionSection("🔥", wholeNumber(totals.calories), sizing, GlanceModifier.defaultWeight())
-            NutritionSection("🍗", wholeNumber(totals.protein), sizing, GlanceModifier.defaultWeight())
-            NutritionSection("🌾", wholeNumber(totals.fiber), sizing, GlanceModifier.defaultWeight())
-            NutritionSection("🥑", wholeNumber(totals.fat), sizing, GlanceModifier.defaultWeight())
+            NutritionSection("🔥", wholeNumber(totals.calories), "kcal", sizing, GlanceModifier.defaultWeight())
+            NutritionSection("🍗", wholeNumber(totals.protein), "g", sizing, GlanceModifier.defaultWeight())
+            NutritionSection("🌾", wholeNumber(totals.fiber), "g", sizing, GlanceModifier.defaultWeight())
+            NutritionSection("🥑", wholeNumber(totals.fat), "g", sizing, GlanceModifier.defaultWeight())
 
             Box(
                 modifier = GlanceModifier.defaultWeight(),
@@ -148,6 +154,7 @@ private fun WidgetContent(totals: NutritionTotals) {
 private fun NutritionSection(
     emoji: String,
     value: String,
+    unit: String,
     sizing: WidgetSizing,
     modifier: GlanceModifier
 ) {
@@ -168,6 +175,15 @@ private fun NutritionSection(
                     fontSize = sizing.valueSize,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
+                    textAlign = TextAlign.Center
+                ),
+                maxLines = 1
+            )
+            Text(
+                text = unit,
+                style = TextStyle(
+                    color = WidgetUnitText,
+                    fontSize = sizing.unitSize,
                     textAlign = TextAlign.Center
                 ),
                 maxLines = 1

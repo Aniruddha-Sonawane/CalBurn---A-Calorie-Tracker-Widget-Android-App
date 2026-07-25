@@ -179,7 +179,9 @@ private fun PopupTopBar(
                 onValueChange = onQuery,
                 modifier = Modifier.weight(1f),
                 placeholder = { Text("Search foods") },
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(28.dp),
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
             )
             IconButton(onClick = { onQuery(""); onToggleSearch() }) {
                 Icon(Icons.Default.Close, contentDescription = "Close search")
@@ -308,7 +310,11 @@ private fun FoodAmount(food: FoodEntity, add: (Double) -> Unit, cancel: () -> Un
     val amount = grams.toDoubleOrNull() ?: 0.0
     val factor = amount / 100.0
     Column(Modifier.padding(20.dp)) {
-        Text(food.name, style = MaterialTheme.typography.headlineSmall)
+        Text(
+            food.name,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
         OutlinedTextField(
             value = grams,
             onValueChange = { grams = it },
