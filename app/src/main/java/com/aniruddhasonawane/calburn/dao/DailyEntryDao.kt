@@ -1,4 +1,4 @@
-﻿package com.aniruddhasonawane.calburn.dao
+package com.aniruddhasonawane.calburn.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -37,14 +37,12 @@ interface DailyEntryDao {
         date: LocalDate
     ): Flow<List<DailyEntryEntity>>
 
-    /*
-     * Returns every date that has at least one food record.
-     *
-     * Because this is grouped by date, dates with no entries
-     * do not exist in the returned list at all.
-     *
-     * This is specifically used by Home's swipe navigation.
-     */
+    @Query(
+        "SELECT * FROM daily_entries " +
+        "ORDER BY date DESC, createdAt DESC"
+    )
+    suspend fun getAllEntries(): List<DailyEntryEntity>
+
     @Query(
         "SELECT date, " +
         "COALESCE(SUM(calories),0) calories, " +
@@ -58,9 +56,6 @@ interface DailyEntryDao {
     fun observeAllDailyTotals():
         Flow<List<DailyTotalRow>>
 
-    /*
-     * Existing history query retained for the History tab.
-     */
     @Query(
         "SELECT date, " +
         "COALESCE(SUM(calories),0) calories, " +
