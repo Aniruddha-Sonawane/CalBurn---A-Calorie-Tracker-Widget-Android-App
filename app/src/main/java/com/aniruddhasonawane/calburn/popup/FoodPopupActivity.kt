@@ -1,4 +1,4 @@
-package com.aniruddhasonawane.calburn.popup
+﻿package com.aniruddhasonawane.calburn.popup
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -73,12 +74,14 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class FoodPopupActivity : ComponentActivity() {
+
     private val viewModel: FoodPopupViewModel by viewModels {
         FoodPopupViewModelFactory((application as CalBurnApplication).repository)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             CalBurnTheme(darkTheme = true, dynamicColor = false) {
                 MaterialTheme(
@@ -186,7 +189,9 @@ private fun PopupRoot(
         PopupMode.ADD -> selected?.let { food ->
             FoodAmount(
                 food = food,
-                add = { grams -> viewModel.add(food, grams, complete) },
+                add = { grams ->
+                    viewModel.add(food, grams, complete)
+                },
                 cancel = { mode = PopupMode.LIST }
             )
         }
@@ -414,7 +419,9 @@ private fun FoodList(
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
             title = { Text("Delete ${food.name}?") },
-            text = { Text("Saved food will be deleted. Existing history remains.") },
+            text = {
+                Text("Saved food will be deleted. Existing history remains.")
+            },
             confirmButton = {
                 Button({
                     delete(food)
@@ -508,30 +515,80 @@ private fun FoodAmount(
     add: (Double) -> Unit,
     cancel: () -> Unit
 ) {
-    var grams by remember {
-        mutableStateOf(
-            format(food.defaultGrams)
-        )
-    }
+    var multiplier by remember { mutableStateOf(1) }
 
-    val amount = grams.toDoubleOrNull() ?: 0.0
+    /*
+     * The saved food's defaultGrams is the amount represented by ×1.
+     *
+     * Examples:
+     *   defaultGrams = 200
+     *   ×1 -> 200 g
+     *   ×2 -> 400 g
+     *   ×3 -> 600 g
+     *
+     * All nutrition values are calculated from the resulting grams,
+     * so they remain directly proportional to the multiplier.
+     */
+    val amount = food.defaultGrams * multiplier
     val factor = amount / 100.0
 
     Column(Modifier.padding(20.dp)) {
-        Text(
-            food.name,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
 
-        OutlinedTextField(
-            value = grams,
-            onValueChange = { grams = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp),
-            label = { Text("Grams") },
-            singleLine = true
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                food.name,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "× $multiplier",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Button(
+                    onClick = {
+                        if (multiplier > 1) {
+                            multiplier--
+                        }
+                    },
+                    enabled = multiplier > 1,
+                    contentPadding = PaddingValues(
+                        horizontal = 12.dp,
+                        vertical = 4.dp
+                    )
+                ) {
+                    Text("−")
+                }
+
+                Button(
+                    onClick = {
+                        multiplier++
+                    },
+                    contentPadding = PaddingValues(
+                        horizontal = 12.dp,
+                        vertical = 4.dp
+                    )
+                ) {
+                    Text("+")
+                }
+            }
+        }
+
+        Text(
+            text = "${format(amount)} g",
+            modifier = Modifier.padding(top = 12.dp),
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.Gray
         )
 
         Column(Modifier.padding(top = 16.dp)) {
@@ -539,14 +596,17 @@ private fun FoodAmount(
                 "Calories",
                 format(food.caloriesPer100g * factor)
             )
+
             MacroRow(
                 "Protein",
                 "${format(food.proteinPer100g * factor)} g"
             )
+
             MacroRow(
                 "Fiber",
                 "${format(food.fiberPer100g * factor)} g"
             )
+
             MacroRow(
                 "Fat",
                 "${format(food.fatPer100g * factor)} g"
@@ -563,10 +623,10 @@ private fun FoodAmount(
                 Text("Cancel")
             }
 
-            Spacer(Modifier.padding(4.dp))
+            Spacer(Modifier.width(8.dp))
 
             Button(
-                {
+                onClick = {
                     if (amount > 0) {
                         add(amount)
                     }
@@ -649,6 +709,7 @@ private fun FoodEditor(
     }
 
     val qty = quantity.toDoubleOrNull()
+
     val values = listOf(
         calories,
         protein,
@@ -740,7 +801,7 @@ private fun FoodEditor(
                 Text("Cancel")
             }
 
-            Spacer(Modifier.padding(4.dp))
+            Spacer(Modifier.width(8.dp))
 
             Button(
                 onClick = {
