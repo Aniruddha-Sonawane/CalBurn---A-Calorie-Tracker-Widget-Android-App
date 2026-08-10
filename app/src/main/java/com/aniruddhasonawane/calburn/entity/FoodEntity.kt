@@ -12,5 +12,6 @@ data class FoodEntity(
     val proteinPer100g: Double,
     val fiberPer100g: Double,
     val fatPer100g: Double,
+    val defaultGrams: Double = 100.0,
     val lastUsedAt: Long = 0L
 )
