@@ -59,6 +59,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -192,7 +194,9 @@ private fun PopupRoot(
                 add = { grams ->
                     viewModel.add(food, grams, complete)
                 },
-                cancel = { mode = PopupMode.LIST }
+                cancel = {
+                    mode = PopupMode.LIST
+                }
             )
         }
 
@@ -205,7 +209,9 @@ private fun PopupRoot(
                     viewModel.update(updated)
                     mode = PopupMode.LIST
                 },
-                cancel = { mode = PopupMode.LIST }
+                cancel = {
+                    mode = PopupMode.LIST
+                }
             )
         }
     }
@@ -222,7 +228,12 @@ private fun PopupTopBar(
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 10.dp, top = 18.dp, bottom = 6.dp),
+            .padding(
+                start = 20.dp,
+                end = 10.dp,
+                top = 18.dp,
+                bottom = 6.dp
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (searchActive) {
@@ -230,18 +241,25 @@ private fun PopupTopBar(
                 value = query,
                 onValueChange = onQuery,
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Search foods") },
+                placeholder = {
+                    Text("Search foods")
+                },
                 singleLine = true,
                 shape = RoundedCornerShape(28.dp),
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = null)
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null
+                    )
                 }
             )
 
-            IconButton(onClick = {
-                onQuery("")
-                onToggleSearch()
-            }) {
+            IconButton(
+                onClick = {
+                    onQuery("")
+                    onToggleSearch()
+                }
+            ) {
                 Icon(
                     Icons.Default.Close,
                     contentDescription = "Close search"
@@ -286,7 +304,9 @@ private fun CategoryTabs(
         item {
             TabChip(
                 selected = selectedTab == TAB_RECENT,
-                onClick = { onSelect(TAB_RECENT) }
+                onClick = {
+                    onSelect(TAB_RECENT)
+                }
             ) {
                 Icon(
                     Icons.Default.History,
@@ -299,7 +319,9 @@ private fun CategoryTabs(
         item {
             TabChip(
                 selected = selectedTab == TAB_ALL,
-                onClick = { onSelect(TAB_ALL) }
+                onClick = {
+                    onSelect(TAB_ALL)
+                }
             ) {
                 Text("All")
             }
@@ -307,8 +329,13 @@ private fun CategoryTabs(
 
         items(categories) { category ->
             TabChip(
-                selected = selectedTab.equals(category, ignoreCase = true),
-                onClick = { onSelect(category) }
+                selected = selectedTab.equals(
+                    category,
+                    ignoreCase = true
+                ),
+                onClick = {
+                    onSelect(category)
+                }
             ) {
                 Text(category)
             }
@@ -362,23 +389,28 @@ private fun FoodList(
     edit: (FoodEntity) -> Unit,
     delete: (FoodEntity) -> Unit
 ) {
-    var pendingDelete by remember { mutableStateOf<FoodEntity?>(null) }
+    var pendingDelete by remember {
+        mutableStateOf<FoodEntity?>(null)
+    }
 
-    Column(Modifier.widthIn(max = 600.dp)) {
+    Column(
+        Modifier.widthIn(max = 600.dp)
+    ) {
         PopupTopBar(
-            searchActive,
-            query,
-            onQuery,
-            onToggleSearch,
-            newFood
+            searchActive = searchActive,
+            query = query,
+            onQuery = onQuery,
+            onToggleSearch = onToggleSearch,
+            onNewFood = newFood
         )
 
         if (!searchActive) {
             CategoryTabs(
-                categories,
-                selectedTab,
-                onSelectTab
+                categories = categories,
+                selectedTab = selectedTab,
+                onSelect = onSelectTab
             )
+
             Spacer(Modifier.height(10.dp))
         } else {
             Spacer(Modifier.height(6.dp))
@@ -400,12 +432,21 @@ private fun FoodList(
                 }
             }
 
-            items(displayedFoods, key = { it.id }) { food ->
+            items(
+                displayedFoods,
+                key = { it.id }
+            ) { food ->
                 FoodRow(
-                    food,
-                    { add(food) },
-                    { edit(food) },
-                    { pendingDelete = food }
+                    food = food,
+                    add = {
+                        add(food)
+                    },
+                    edit = {
+                        edit(food)
+                    },
+                    delete = {
+                        pendingDelete = food
+                    }
                 )
             }
 
@@ -417,23 +458,33 @@ private fun FoodList(
 
     pendingDelete?.let { food ->
         AlertDialog(
-            onDismissRequest = { pendingDelete = null },
-            title = { Text("Delete ${food.name}?") },
+            onDismissRequest = {
+                pendingDelete = null
+            },
+            title = {
+                Text("Delete ${food.name}?")
+            },
             text = {
-                Text("Saved food will be deleted. Existing history remains.")
+                Text(
+                    "Saved food will be deleted. Existing history remains."
+                )
             },
             confirmButton = {
-                Button({
-                    delete(food)
-                    pendingDelete = null
-                }) {
+                Button(
+                    onClick = {
+                        delete(food)
+                        pendingDelete = null
+                    }
+                ) {
                     Text("Delete")
                 }
             },
             dismissButton = {
-                Button({
-                    pendingDelete = null
-                }) {
+                Button(
+                    onClick = {
+                        pendingDelete = null
+                    }
+                ) {
                     Text("Cancel")
                 }
             }
@@ -449,7 +500,9 @@ private fun FoodRow(
     edit: () -> Unit,
     delete: () -> Unit
 ) {
-    var menu by remember { mutableStateOf(false) }
+    var menu by remember {
+        mutableStateOf(false)
+    }
 
     Card(
         Modifier
@@ -466,7 +519,10 @@ private fun FoodRow(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 16.dp
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -475,9 +531,11 @@ private fun FoodRow(
             )
 
             Box {
-                IconButton({
-                    menu = true
-                }) {
+                IconButton(
+                    onClick = {
+                        menu = true
+                    }
+                ) {
                     Icon(
                         Icons.Default.MoreVert,
                         "Food menu"
@@ -485,20 +543,26 @@ private fun FoodRow(
                 }
 
                 DropdownMenu(
-                    menu,
-                    { menu = false }
+                    expanded = menu,
+                    onDismissRequest = {
+                        menu = false
+                    }
                 ) {
                     DropdownMenuItem(
-                        { Text("Edit") },
-                        {
+                        text = {
+                            Text("Edit")
+                        },
+                        onClick = {
                             menu = false
                             edit()
                         }
                     )
 
                     DropdownMenuItem(
-                        { Text("Delete") },
-                        {
+                        text = {
+                            Text("Delete")
+                        },
+                        onClick = {
                             menu = false
                             delete()
                         }
@@ -515,101 +579,196 @@ private fun FoodAmount(
     add: (Double) -> Unit,
     cancel: () -> Unit
 ) {
-    var multiplier by remember { mutableStateOf(1) }
+    var multiplier by remember {
+        mutableStateOf(1)
+    }
 
-    /*
-     * The saved food's defaultGrams is the amount represented by ×1.
-     *
-     * Examples:
-     *   defaultGrams = 200
-     *   ×1 -> 200 g
-     *   ×2 -> 400 g
-     *   ×3 -> 600 g
-     *
-     * All nutrition values are calculated from the resulting grams,
-     * so they remain directly proportional to the multiplier.
-     */
-    val amount = food.defaultGrams * multiplier
+    var grams by remember {
+        mutableStateOf(
+            format(food.defaultGrams)
+        )
+    }
+
+    val amount = grams.toDoubleOrNull() ?: 0.0
     val factor = amount / 100.0
 
-    Column(Modifier.padding(20.dp)) {
+    Column(
+        Modifier.padding(20.dp)
+    ) {
 
+        /*
+         * Top row:
+         *
+         * Chicken  X 2                         −  +
+         *
+         * X = orange
+         * multiplier = large white
+         * minus/plus = large bold controls at top-right
+         */
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
-            Text(
-                food.name,
+
+            Row(
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = food.name,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+
+                Spacer(
+                    Modifier.width(8.dp)
+                )
+
+                Text(
+                    text = "X",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFFFF8A3D)
+                )
+
+                Spacer(
+                    Modifier.width(4.dp)
+                )
+
+                Text(
+                    text = multiplier.toString(),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
+                )
+            }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Text(
-                    text = "× $multiplier",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Button(
+                IconButton(
                     onClick = {
                         if (multiplier > 1) {
                             multiplier--
+
+                            /*
+                             * Multiplier always represents a multiple
+                             * of the saved default quantity.
+                             */
+                            grams = format(
+                                food.defaultGrams * multiplier
+                            )
                         }
                     },
                     enabled = multiplier > 1,
-                    contentPadding = PaddingValues(
-                        horizontal = 12.dp,
-                        vertical = 4.dp
-                    )
+                    modifier = Modifier.size(52.dp)
                 ) {
-                    Text("−")
+                    Text(
+                        text = "−",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (multiplier > 1) {
+                            Color.White
+                        } else {
+                            Color(0xFF666666)
+                        }
+                    )
                 }
 
-                Button(
+                IconButton(
                     onClick = {
                         multiplier++
+
+                        /*
+                         * + means another full default-food quantity.
+                         */
+                        grams = format(
+                            food.defaultGrams * multiplier
+                        )
                     },
-                    contentPadding = PaddingValues(
-                        horizontal = 12.dp,
-                        vertical = 4.dp
-                    )
+                    modifier = Modifier.size(52.dp)
                 ) {
-                    Text("+")
+                    Text(
+                        text = "+",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White
+                    )
                 }
             }
         }
 
-        Text(
-            text = "${format(amount)} g",
-            modifier = Modifier.padding(top = 12.dp),
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.Gray
+        Spacer(
+            Modifier.height(10.dp)
         )
 
-        Column(Modifier.padding(top = 16.dp)) {
+        /*
+         * The grams field is deliberately independent from the
+         * saved FoodEntity.
+         *
+         * Editing this value changes ONLY this particular addition.
+         * It does not update food.defaultGrams.
+         */
+        OutlinedTextField(
+            value = grams,
+            onValueChange = {
+                /*
+                 * Allow only a valid numeric input.
+                 * Empty is temporarily allowed while editing.
+                 */
+                if (
+                    it.isEmpty() ||
+                    it.matches(Regex("^\\d*(\\.\\d*)?$"))
+                ) {
+                    grams = it
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 58.dp),
+            label = {
+                Text("Grams")
+            },
+            suffix = {
+                Text("g")
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Decimal
+            )
+        )
+
+        Column(
+            Modifier.padding(top = 16.dp)
+        ) {
             MacroRow(
                 "Calories",
-                format(food.caloriesPer100g * factor)
+                format(
+                    food.caloriesPer100g * factor
+                )
             )
 
             MacroRow(
                 "Protein",
-                "${format(food.proteinPer100g * factor)} g"
+                "${format(
+                    food.proteinPer100g * factor
+                )} g"
             )
 
             MacroRow(
                 "Fiber",
-                "${format(food.fiberPer100g * factor)} g"
+                "${format(
+                    food.fiberPer100g * factor
+                )} g"
             )
 
             MacroRow(
                 "Fat",
-                "${format(food.fatPer100g * factor)} g"
+                "${format(
+                    food.fatPer100g * factor
+                )} g"
             )
         }
 
@@ -619,11 +778,15 @@ private fun FoodAmount(
                 .padding(top = 18.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(cancel) {
+            Button(
+                onClick = cancel
+            ) {
                 Text("Cancel")
             }
 
-            Spacer(Modifier.width(8.dp))
+            Spacer(
+                Modifier.width(8.dp)
+            )
 
             Button(
                 onClick = {
@@ -671,11 +834,15 @@ private fun FoodEditor(
     cancel: () -> Unit
 ) {
     var name by remember {
-        mutableStateOf(existing?.name.orEmpty())
+        mutableStateOf(
+            existing?.name.orEmpty()
+        )
     }
 
     var category by remember {
-        mutableStateOf(existing?.category.orEmpty())
+        mutableStateOf(
+            existing?.category.orEmpty()
+        )
     }
 
     var quantity by remember {
@@ -715,13 +882,17 @@ private fun FoodEditor(
         protein,
         fiber,
         fat
-    ).map { it.toDoubleOrNull() }
+    ).map {
+        it.toDoubleOrNull()
+    }
 
     val valid =
         name.isNotBlank() &&
         qty != null &&
         qty > 0 &&
-        values.all { it != null && it >= 0 }
+        values.all {
+            it != null && it >= 0
+        }
 
     Column(
         Modifier
@@ -729,15 +900,25 @@ private fun FoodEditor(
             .verticalScroll(rememberScrollState())
     ) {
         Text(
-            if (existing == null) "New Food" else "Edit Food",
+            if (existing == null) {
+                "New Food"
+            } else {
+                "Edit Food"
+            },
             style = MaterialTheme.typography.headlineSmall
         )
 
-        Field("Food Name", name) {
+        Field(
+            "Food Name",
+            name
+        ) {
             name = it
         }
 
-        Field("Category", category) {
+        Field(
+            "Category",
+            category
+        ) {
             category = it
         }
 
@@ -761,7 +942,10 @@ private fun FoodEditor(
             }
         }
 
-        Field("Quantity (g)", quantity) {
+        Field(
+            "Quantity (g)",
+            quantity
+        ) {
             quantity = it
         }
 
@@ -775,19 +959,31 @@ private fun FoodEditor(
             )
         )
 
-        Field("Calories", calories) {
+        Field(
+            "Calories",
+            calories
+        ) {
             calories = it
         }
 
-        Field("Protein (g)", protein) {
+        Field(
+            "Protein (g)",
+            protein
+        ) {
             protein = it
         }
 
-        Field("Fiber (g)", fiber) {
+        Field(
+            "Fiber (g)",
+            fiber
+        ) {
             fiber = it
         }
 
-        Field("Fat (g)", fat) {
+        Field(
+            "Fat (g)",
+            fat
+        ) {
             fat = it
         }
 
@@ -797,11 +993,15 @@ private fun FoodEditor(
                 .padding(top = 12.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(cancel) {
+            Button(
+                onClick = cancel
+            ) {
                 Text("Cancel")
             }
 
-            Spacer(Modifier.width(8.dp))
+            Spacer(
+                Modifier.width(8.dp)
+            )
 
             Button(
                 onClick = {
@@ -814,12 +1014,17 @@ private fun FoodEditor(
                             category = category.trim().ifBlank {
                                 "General"
                             },
-                            caloriesPer100g = values[0]!! * factor,
-                            proteinPer100g = values[1]!! * factor,
-                            fiberPer100g = values[2]!! * factor,
-                            fatPer100g = values[3]!! * factor,
+                            caloriesPer100g =
+                                values[0]!! * factor,
+                            proteinPer100g =
+                                values[1]!! * factor,
+                            fiberPer100g =
+                                values[2]!! * factor,
+                            fatPer100g =
+                                values[3]!! * factor,
                             defaultGrams = qty!!,
-                            lastUsedAt = existing?.lastUsedAt ?: 0
+                            lastUsedAt =
+                                existing?.lastUsedAt ?: 0
                         ),
                         qty!!
                     )
@@ -839,17 +1044,21 @@ private fun Field(
     change: (String) -> Unit
 ) {
     OutlinedTextField(
-        value,
-        change,
-        Modifier
+        value = value,
+        onValueChange = change,
+        modifier = Modifier
             .fillMaxWidth()
             .padding(top = 7.dp),
-        label = { Text(label) },
+        label = {
+            Text(label)
+        },
         singleLine = true
     )
 }
 
-private fun format(value: Double): String =
+private fun format(
+    value: Double
+): String =
     String.format(
         Locale.US,
         "%.1f",
